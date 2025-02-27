@@ -9,24 +9,8 @@ import (
 	"github.com/azhar.firdaus/simple-messenger/routes"
 )
 
-func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-
-	config, err := ReadConfig()
-	if err != nil {
-		return
-	}
-
-	// Register handlers
-	http.HandleFunc("/hello", routes.HelloHandler)
-
-	// Start the server
-	log.Printf("Server started on :%v", *config.Port)
-	port := ":" + *config.Port
-	if err := http.ListenAndServe(port, nil); err != nil {
-		log.Fatalf("Could not start server: %v", err)
-		return
-	}
+type Config struct {
+	Port *string `json:"port"`
 }
 
 func ReadConfig() (*Config, error) {
@@ -46,4 +30,24 @@ func ReadConfig() (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	config, err := ReadConfig()
+	if err != nil {
+		return
+	}
+
+	// Register handlers
+	http.HandleFunc("/hello", routes.HelloHandler)
+
+	// Start the server
+	log.Printf("Server started on :%v", *config.Port)
+	port := ":" + *config.Port
+	if err := http.ListenAndServe(port, nil); err != nil {
+		log.Fatalf("Could not start server: %v", err)
+		return
+	}
 }
