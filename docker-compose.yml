@@ -1,0 +1,12 @@
+services:
+  service:
+    image: simple-messenger:latest
+    container_name: simple-messenger
+    ports:
+      - "8080:8080"
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
