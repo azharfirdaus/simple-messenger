@@ -1,5 +1,5 @@
 # simple-messenger
 
 ## Build & Run
-$ docker build -t simple-messenger .
+$ docker buildx build --progress=plain -t simple-messenger .
 $ docker compose up

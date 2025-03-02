@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/azhar.firdaus/simple-messenger/config"
 	msg "github.com/azhar.firdaus/simple-messenger/messaging"
 )
 
@@ -28,7 +29,7 @@ func CreateMessage(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(ErrorResponse{Error: "message is empty"})
 	}
 
-	kafkaClient := msg.NewKafkaMessageQueueClientImpl("localhost:9092", "create_message")
+	kafkaClient := msg.NewKafkaMessageQueueClientImpl(*config.GlobalConfig.KafkaBroker, "create_message")
 	err = kafkaClient.Produce(*request.Message)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
