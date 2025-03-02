@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/mux"
+
 	"github.com/azhar.firdaus/simple-messenger/routes"
 )
 
@@ -40,13 +42,14 @@ func main() {
 		return
 	}
 
-	// Register handlers
-	http.HandleFunc("/hello", routes.HelloHandler)
+	router := mux.NewRouter()
+	router.HandleFunc("/hello", routes.HelloHandler).Methods("GET")
+	router.HandleFunc("/message", routes.CreateMessage).Methods("POST")
 
 	// Start the server
 	log.Printf("Server started on :%v", *config.Port)
 	port := ":" + *config.Port
-	if err := http.ListenAndServe(port, nil); err != nil {
+	if err := http.ListenAndServe(port, router); err != nil {
 		log.Fatalf("Could not start server: %v", err)
 		return
 	}
