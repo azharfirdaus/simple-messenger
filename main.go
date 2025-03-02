@@ -20,7 +20,6 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/hello", routes.HelloHandler).Methods("GET")
 	router.HandleFunc("/message", routes.CreateMessage).Methods("POST")
 
 	// Start the server
