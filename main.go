@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/azhar.firdaus/simple-messenger/config"
+	"github.com/azhar.firdaus/simple-messenger/messaging"
 	"github.com/azhar.firdaus/simple-messenger/routes"
 	"github.com/gorilla/mux"
 )
@@ -19,6 +20,8 @@ func main() {
 		return
 	}
 
+	consumeKafka(config.GlobalConfig.KafkaBroker)
+
 	router := mux.NewRouter()
 	router.HandleFunc("/message", routes.CreateMessage).Methods("POST")
 
@@ -29,4 +32,9 @@ func main() {
 		log.Fatalf("Could not start server: %v", err)
 		return
 	}
+}
+
+func consumeKafka(broker *string) {
+	client := messaging.NewKafkaMessageQueueClientImpl(*broker, "create_message")
+	go client.Consume()
 }
