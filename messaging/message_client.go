@@ -2,29 +2,31 @@ package messaging
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/IBM/sarama"
+	"google.golang.org/protobuf/proto"
 )
 
-type MessageQueueClient interface {
-	Produce(message string) error
+type ChatQueueClient interface {
+	Produce(userID, data *string) error
 	Consume()
 }
 
-type KafkaMessageQueueClientImpl struct {
+type KafkaChatQueueClientImpl struct {
 	broker *string
 	topic  *string
 }
 
-func NewKafkaMessageQueueClientImpl(broker string, topic string) *KafkaMessageQueueClientImpl {
-	return &KafkaMessageQueueClientImpl{
+func NewKafkaMessageQueueClientImpl(broker string, topic string) *KafkaChatQueueClientImpl {
+	return &KafkaChatQueueClientImpl{
 		broker: &broker,
 		topic:  &topic,
 	}
 }
 
-func (k *KafkaMessageQueueClientImpl) Produce(message string) error {
+func (k KafkaChatQueueClientImpl) Produce(ID *uint64, data *string) error {
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
 	config.Producer.RequiredAcks = 0
@@ -37,9 +39,15 @@ func (k *KafkaMessageQueueClientImpl) Produce(message string) error {
 
 	defer producer.Close()
 
+	protobufChat := &ProtobufChat{ID: *ID, Data: *data}
+	protobufChatBytes, err := proto.Marshal(protobufChat)
+	if err != nil {
+		return fmt.Errorf("failed to marshal: %v", err)
+	}
+
 	msg := &sarama.ProducerMessage{
 		Topic: *k.topic,
-		Value: sarama.StringEncoder(message),
+		Value: sarama.ByteEncoder(protobufChatBytes),
 	}
 
 	partition, offset, err := producer.SendMessage(msg)
@@ -53,7 +61,7 @@ func (k *KafkaMessageQueueClientImpl) Produce(message string) error {
 	return nil
 }
 
-func (k *KafkaMessageQueueClientImpl) Consume(consumerGroupHandler *ConsumerGroupHandler) {
+func (k KafkaChatQueueClientImpl) Consume(consumerGroupHandler *ConsumerGroupHandler) {
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 

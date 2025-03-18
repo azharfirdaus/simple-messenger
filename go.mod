@@ -5,6 +5,7 @@ go 1.23.6
 require (
 	github.com/IBM/sarama v1.45.0
 	github.com/gorilla/mux v1.8.1
+	google.golang.org/protobuf v1.36.5
 )
 
 require (

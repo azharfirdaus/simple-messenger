@@ -12,8 +12,8 @@ import (
 )
 
 type Chat struct {
-	ID        *uint64    `bson:"userID"`
-	Data      []*Message `bson:"messages"`
+	ID        *uint64    `bson:"ID"`
+	Messages  []*Message `bson:"messages"`
 	CreatedAt *time.Time `bson:"createdAt"`
 }
 

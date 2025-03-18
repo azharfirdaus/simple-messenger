@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package messaging;
+
+option go_package = "github.com/azhar.firdaus/simple-messenger/";
+
+message ProtobufChat {
+    uint64 ID = 1;
+    string data = 2;
+}
