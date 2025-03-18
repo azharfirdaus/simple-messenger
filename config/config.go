@@ -11,6 +11,7 @@ var GlobalConfig *Config
 type Config struct {
 	Port        *string `json:"port"`
 	KafkaBroker *string `json:"kafkaBroker"`
+	MongoDbUri  *string `json:"mongoDbUri"`
 }
 
 func ReadConfig() (*Config, error) {

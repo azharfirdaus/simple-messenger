@@ -1,4 +1,5 @@
 {
     "port": "8080",
-    "kafkaBroker": "localhost:9092"
+    "kafkaBroker": "localhost:9092",
+    "mongoDbUri": "mongodb://root:password@localhost:27017"
 }

@@ -53,7 +53,7 @@ func (k *KafkaMessageQueueClientImpl) Produce(message string) error {
 	return nil
 }
 
-func (k *KafkaMessageQueueClientImpl) Consume() {
+func (k *KafkaMessageQueueClientImpl) Consume(consumerGroupHandler *ConsumerGroupHandler) {
 	config := sarama.NewConfig()
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 
@@ -63,29 +63,25 @@ func (k *KafkaMessageQueueClientImpl) Consume() {
 	}
 	defer consumerGroup.Close()
 
-	handler := &ConsumerGroupHandler{}
-
 	ctx := context.Background()
-
-	// Start consuming messages
 	log.Printf("Starting consumer for topic: %s\n", *k.topic)
 	for {
-		// Consume messages
-		err := consumerGroup.Consume(ctx, []string{*k.topic}, handler)
+		err := consumerGroup.Consume(ctx, []string{*k.topic}, consumerGroupHandler)
 		if err != nil {
 			log.Fatalf("Error from consumer: %v", err)
 		}
 	}
 }
 
-type ConsumerGroupHandler struct{}
+type ConsumerGroupHandler struct {
+	Handler func(topic *string, partition *int32, offset *int64, key, value *[]byte)
+}
 
-func (ConsumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
-func (ConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (h ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+func (*ConsumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+func (*ConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (h *ConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for message := range claim.Messages() {
-		log.Printf("Received message: %s (topic: %s, partition: %d, offset: %d)\n",
-			string(message.Value), message.Topic, message.Partition, message.Offset)
+		h.Handler(&message.Topic, &message.Partition, &message.Offset, &message.Key, &message.Value)
 		session.MarkMessage(message, "") // Mark message as processed
 	}
 	return nil

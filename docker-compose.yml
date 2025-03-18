@@ -7,6 +7,7 @@ services:
     depends_on:
       - zookeeper
       - kafka
+      - mongodb
     networks:
       - my_network
   
@@ -34,8 +35,21 @@ services:
     networks:
       - my_network
     depends_on:
-    - zookeeper
-
+      - zookeeper
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongodb_data:/data/db
+    restart: always
 networks:
   my_network:
     driver: bridge
+
+volumes:
+  mongodb_data:
